@@ -311,7 +311,7 @@ class mumbleBot(threading.Thread):
         #Type 1 = UDPTUnnel (voice data, not a real protobuffers message)                    
         if msgType==1:
             session,sessLen=self.decodePDSInt(stringMessage,1)
-            #XXX decode again before write ?
+            #XXX decode again before write to stdout
             sys.stdout.write(stringMessage[1+sessLen:])
         #Type 1 = UDPTUnnel (voice data, not a real protobuffers message)
         if msgType!=1 and self.verbose:
