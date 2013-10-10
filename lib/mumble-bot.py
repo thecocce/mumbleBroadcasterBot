@@ -76,7 +76,7 @@ for i in messageLookupMessage.keys():
 
 
 def discontinue_processing(signl, frme):
-    sys.stderr.write( time.strftime("%a, %d %b %Y %H:%M:%S +0000"), "Received shutdown notice" )
+    sys.stderr.write( "%s %s " % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"), "Received shutdown notice" ))
     if mumblebot:
         mumblebot.wrapUpThread(True)
     else:
@@ -148,7 +148,7 @@ class timedWatcher(threading.Thread):
                 sleeptime = altsleeptime
             if sleeptime > 0:
                 time.sleep(sleeptime)
-        sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"timed thread going away")
+        sys.stderr.write("%s %s %s" % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"timed thread going away"))
 
                     
 class mumbleBot(threading.Thread):
@@ -192,14 +192,14 @@ class mumbleBot(threading.Thread):
             elif ((v & 0xFC) == 0xFC):
                 return (-(v & 0x03),1)
             else:
-                sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),"Help Help, out of cheese :(")
+                sys.stderr.write("%s %s " % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),"Help Help, out of cheese :("))
                 sys.exit(1)
         elif ((v & 0xF0) == 0xE0):
             return ((v & 0x0F) << 24 | ord(m[si+1]) << 16 | ord(m[si+2]) << 8 | ord(m[si+3]),4)
         elif ((v & 0xE0) == 0xC0):
             return ((v & 0x1F) << 16 | ord(m[si+1]) << 8 | ord(m[si+2]),3)
         else:
-            sys.stderr.write( time.strftime("%a, %d %b %Y %H:%M:%S +0000"),"out of cheese?")
+            sys.stderr.write( "%s %s" % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),"out of cheese?"))
             sys.exit(1)
 
     def packageMessageForSending(self,msgType,stringMessage):
@@ -211,7 +211,7 @@ class mumbleBot(threading.Thread):
         while len(message)>0:
             sent=self.socket.send(message)
             if sent < 0:
-                sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Server socket error while trying to write, immediate abort")
+                sys.stderr.write("%s %s %s" % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Server socket error while trying to write, immediate abort"))
                 self.socketLock.release()
                 return False
             message=message[sent:]
@@ -225,10 +225,10 @@ class mumbleBot(threading.Thread):
                 received=self.socket.recv(size-len(message))
                 message+=received
                 if len(received)==0:
-                    sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Server socket died while trying to read, immediate abort")
+                    sys.stderr.write("%s %s %s" %(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Server socket died while trying to read, immediate abort"))
                     return None
             except:
-                sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Exception at socket read - ignoring")
+                sys.stderr.write("%s %s %s" % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Exception at socket read - ignoring"))
         return message
 
     def wrapUpThread(self,killChildrenImmediately=False):
@@ -276,7 +276,7 @@ class mumbleBot(threading.Thread):
         if msgType==8 and self.session!=None:
             message=self.parseMessage(msgType,stringMessage)
             if message.session==self.session:
-                sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"********* KICKED ***********")
+                sys.stderr.write("%s %s %s " % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"********* KICKED ***********"))
                 self.wrapUpThread(False)
                 return
         
@@ -317,7 +317,7 @@ class mumbleBot(threading.Thread):
         if msgType!=1 and self.verbose:
             try:
               message=self.parseMessage(msgType,stringMessage)
-              sys.stderr.write(str(type(message)),message)
+              sys.stderr.write("%s %s" % (str(type(message)),message))
             except KeyError:
               sys.stderr.write("Ignoring unknown message of type " + str(msgType))
 
@@ -326,10 +326,10 @@ class mumbleBot(threading.Thread):
         try:
             self.socket.connect(self.host)
         except:
-            sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Couldn't connect to server")
+            sys.stderr.write("%s %s %s " % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Couldn't connect to server"))
             return
         self.socket.setblocking(0)
-        sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"connected to server")
+        sys.stderr.write("%s %s %s " % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"connected to server"))
         pbMess = Mumble_pb2.Version()
         pbMess.release="1.2.0"
         pbMess.version=66048
@@ -353,7 +353,7 @@ class mumbleBot(threading.Thread):
 
         self.timedWatcher = timedWatcher(self.plannedPackets,self.socketLock,self.socket)
         self.timedWatcher.start()
-        sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"started timed watcher",self.timedWatcher.threadName)
+        sys.stderr.write("%s %s %s %s" % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"started timed watcher",self.timedWatcher.threadName))
 
         while True:
             pollList,foo,errList=select.select([sockFD],[],[sockFD])
@@ -369,11 +369,11 @@ class mumbleBot(threading.Thread):
             self.timedWatcher.stopRunning()
 
         self.socket.close()
-        sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"waiting for timed watcher to die...")
+        sys.stderr.write("%s %s %s " % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"waiting for timed watcher to die..."))
         if self.timedWatcher!=None:
             while self.timedWatcher.isAlive():
                 pass
-        sys.stderr.write(time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"thread going away -",self.nickname)
+        sys.stderr.write("%s %s %s %s" % (time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"thread going away -",self.nickname))
 
 def main():
     global mumblebot,warning
