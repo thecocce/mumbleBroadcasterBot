@@ -242,7 +242,12 @@ class mumbleBot(threading.Thread):
                 self.wrapUpThread(True)
                 return
             self.inChannel=True
-
+    def parseMessage(self,msgType,stringMessage):
+        msgClass=messageLookupNumber[msgType]
+        message=msgClass()
+        message.ParseFromString(stringMessage)
+        return message
+        
     def readPacket(self):
         meta=self.readTotally(6)
         if not meta:
@@ -373,9 +378,9 @@ def main():
     p = optparse.OptionParser(description='Mumble 1.2 relaybot to relay audio output from a channel to stdout',
                 prog='mumble-bot.py',
                 version='%prog 0.1',
-                usage='\t%prog -e \"Source Channel\" -s server -p port -n nick --password password')
+                usage='\t%prog -c \"Source Channel\" -s server -p port -n nick --password password')
 
-    p.add_option("-e","--eavesdrop-in",help="Channel to eavesdrop in (MANDATORY)",action="store",type="string")
+    p.add_option("-c","--channel",help="Channel to listen to in (MANDATORY)",action="store",type="string")
     p.add_option("-s","--server",help="Host to connect to (default %default)",action="store",type="string",default="localhost")
     p.add_option("-p","--port",help="Port to connect to (default %default)",action="store",type="int",default=64738)
     p.add_option("-n","--nick",help="Nickname for the mumblebot (default %default)",action="store",type="string",default="-Eve-")
@@ -388,19 +393,19 @@ def main():
     if len(warning)>0:
         sys.exit(1)
 
-    if o.eavesdrop_in==None:
+    if o.channel==None:
         p.print_help()
         print "\nYou MUST include both an eavesdrop channel to listen to, and a relay channel to relay to"
         sys.exit(1)
 
     host=(o.server,o.port)
 
-    if o.eavesdrop_in=="Root":
+    if o.channel=="Root":
         p.print_help()
-        print "\nEavesdrop channel cannot be root (or it would briefly attempt to mimic everyone who joined - including mimics)"
+        print "\nListen channel cannot be root (or it would briefly attempt to mimic everyone who joined - including mimics)"
         sys.exit(1)
 
-    mumblebot = mumbleBot(host,o.nick,o.eavesdrop_in,password=o.password,verbose=o.verbose)
+    mumblebot = mumbleBot(host,o.nick,o.channel,password=o.password,verbose=o.verbose)
     pp=mumblebot.plannedPackets
     mumblebot.start()
     
