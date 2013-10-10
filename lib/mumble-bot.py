@@ -152,7 +152,7 @@ class timedWatcher(threading.Thread):
 
                     
 class mumbleBot(threading.Thread):
-	def __init__(self,host=None,nickname=None,channel=None,password=None,verbose=False):
+    def __init__(self,host=None,nickname=None,channel=None,password=None,verbose=False):
         global threadNumber
         i = threadNumber
         threadNumber+=1
@@ -169,13 +169,13 @@ class mumbleBot(threading.Thread):
         self.inChannel=False
         self.session=None
         self.channelId=None
-		self.userList={}
+        self.userList={}
         self.readyToClose=False
         self.timedWatcher = None
         self.password=password
         self.verbose=verbose
 
-	def decodePDSInt(self,m,si=0):
+    def decodePDSInt(self,m,si=0):
         v = ord(m[si])
         if ((v & 0x80) == 0x00):
             return ((v & 0x7F),1)
@@ -201,12 +201,12 @@ class mumbleBot(threading.Thread):
         else:
             print time.strftime("%a, %d %b %Y %H:%M:%S +0000"),"out of cheese?"
             sys.exit(1)
-			
-	def packageMessageForSending(self,msgType,stringMessage):
+
+    def packageMessageForSending(self,msgType,stringMessage):
         length=len(stringMessage)
         return struct.pack(headerFormat,msgType,length)+stringMessage
-		
-	def sendTotally(self,message):
+
+    def sendTotally(self,message):
         self.socketLock.acquire()
         while len(message)>0:
             sent=self.socket.send(message)
@@ -217,8 +217,8 @@ class mumbleBot(threading.Thread):
             message=message[sent:]
         self.socketLock.release()
         return True
-	
-	def readTotally(self,size):
+
+    def readTotally(self,size):
         message=""
         while len(message)<size:
             received=self.socket.recv(size-len(message))
@@ -227,13 +227,13 @@ class mumbleBot(threading.Thread):
                 print time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Server socket died while trying to read, immediate abort"
                 return None
         return message
-		
-	def wrapUpThread(self,killChildrenImmediately=False):
+
+    def wrapUpThread(self,killChildrenImmediately=False):
         #called after thread is confirmed to be needing to die because of kick / socket close
         self.readyToClose=True
         self.plannedPackets=collections.deque()
 
-	def joinChannel(self):
+    def joinChannel(self):
         if self.channelId!=None and self.session!=None:
             pbMess = Mumble_pb2.UserState()
             pbMess.session=self.session
@@ -242,8 +242,8 @@ class mumbleBot(threading.Thread):
                 self.wrapUpThread(True)
                 return
             self.inChannel=True
-		
-	def readPacket(self):
+
+    def readPacket(self):
         meta=self.readTotally(6)
         if not meta:
             self.wrapUpThread(True)
@@ -274,37 +274,37 @@ class mumbleBot(threading.Thread):
         
         #only parse these if we are the mumblebot
         
-		#Type 8 = UserRemove (kick)
-		if msgType==8:
-			message=self.parseMessage(msgType,stringMessage)
-			session=message.session
-			if session in self.userList:
-				del self.userList[session]
-		#Type 9 = UserState
-		if msgType==9:
-			message=self.parseMessage(msgType,stringMessage)
-			session=message.session
-			if session in self.userList:
-				record=self.userList[session]
-			else:
-				record={"session":session}
-				self.userList[session]=record
-			name=None
-			channel=None
-			if message.HasField("name"):
-				name=message.name
-				record["name"]=name
-			if message.HasField("channel_id"):
-				channel=message.channel_id
-				record["channel"]=channel
-			if name and not channel:
-				record["channel"]=0
-			self.checkMimic(session)
-		#Type 1 = UDPTUnnel (voice data, not a real protobuffers message)                    
-		if msgType==1:
-			session,sessLen=self.decodePDSInt(stringMessage,1)
-			#XXX decode again before write ?
-			sys.stdout.write(stringMessage[1+sessLen:])
+        #Type 8 = UserRemove (kick)
+        if msgType==8:
+            message=self.parseMessage(msgType,stringMessage)
+            session=message.session
+            if session in self.userList:
+                del self.userList[session]
+        #Type 9 = UserState
+        if msgType==9:
+            message=self.parseMessage(msgType,stringMessage)
+            session=message.session
+            if session in self.userList:
+                record=self.userList[session]
+            else:
+                record={"session":session}
+                self.userList[session]=record
+            name=None
+            channel=None
+            if message.HasField("name"):
+                name=message.name
+                record["name"]=name
+            if message.HasField("channel_id"):
+                channel=message.channel_id
+                record["channel"]=channel
+            if name and not channel:
+                record["channel"]=0
+            self.checkMimic(session)
+        #Type 1 = UDPTUnnel (voice data, not a real protobuffers message)                    
+        if msgType==1:
+            session,sessLen=self.decodePDSInt(stringMessage,1)
+            #XXX decode again before write ?
+            sys.stdout.write(stringMessage[1+sessLen:])
         #Type 1 = UDPTUnnel (voice data, not a real protobuffers message)
         if msgType!=1 and self.verbose:
             try:
@@ -314,7 +314,7 @@ class mumbleBot(threading.Thread):
               print "Ignoring unknown message of type " + str(msgType)
 
 
-	def run(self):
+    def run(self):
         try:
             self.socket.connect(self.host)
         except:
@@ -411,4 +411,3 @@ def main():
 
 if __name__ == '__main__':
         main()
-		
