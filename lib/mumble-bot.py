@@ -246,6 +246,7 @@ class mumbleBot(threading.Thread):
                 return
             self.inChannel=True
     def parseMessage(self,msgType,stringMessage):
+        print "parsing message"
         msgClass=messageLookupNumber[msgType]
         message=msgClass()
         message.ParseFromString(stringMessage)
@@ -269,6 +270,7 @@ class mumbleBot(threading.Thread):
         #Type 7 = ChannelState
         if (not self.inChannel) and msgType==7 and self.channelId==None:
             message=self.parseMessage(msgType,stringMessage)
+            print "parsing message name ", message.name
             if message.name==self.channel:
                 self.channelId=message.channel_id
                 self.joinChannel()
@@ -307,7 +309,7 @@ class mumbleBot(threading.Thread):
                 record["channel"]=channel
             if name and not channel:
                 record["channel"]=0
-            self.checkMimic(session)
+            #self.checkMimic(session)
         #Type 1 = UDPTUnnel (voice data, not a real protobuffers message)                    
         if msgType==1:
             session,sessLen=self.decodePDSInt(stringMessage,1)
