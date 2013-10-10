@@ -221,11 +221,14 @@ class mumbleBot(threading.Thread):
     def readTotally(self,size):
         message=""
         while len(message)<size:
-            received=self.socket.recv(size-len(message))
-            message+=received
-            if len(received)==0:
-                print time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Server socket died while trying to read, immediate abort"
-                return None
+            try:
+                received=self.socket.recv(size-len(message))
+                message+=received
+                if len(received)==0:
+                    print time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Server socket died while trying to read, immediate abort"
+                    return None
+            except:
+                print time.strftime("%a, %d %b %Y %H:%M:%S +0000"),self.threadName,"Exception at socket read - ignoring"
         return message
 
     def wrapUpThread(self,killChildrenImmediately=False):
