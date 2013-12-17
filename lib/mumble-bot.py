@@ -312,6 +312,16 @@ class mumbleBot(threading.Thread):
         if msgType==1:
             session,sessLen=self.decodePDSInt(stringMessage,1)
             #XXX decode again before write to stdout
+            """
+            The audio frames themselves are inside stringMessage[1+sessLen:]
+            From page 12 of the mumble specification PDF it looks like each frame has a
+            1-byte header detailing the length (and if it's the last frame in the message) as well.
+            So we'll have to do additional decoding on that to extract the actual speex data.
+
+            To complicate things even further, if we only want speex and not, say, opus or celt,
+            we'd need to decode the 1-byte header stringMessage[0] to tell what kind of codec
+            the voice data is using
+            """
             sys.stdout.write(stringMessage[1+sessLen:])
         #Type 1 = UDPTUnnel (voice data, not a real protobuffers message)
         if msgType!=1 and self.verbose:
